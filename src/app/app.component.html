@@ -1,0 +1,53 @@
+<!-- autocomplete.component.html -->
+<input #searchInput type="text" placeholder="Search for a location" />
+<ul *ngIf="predictions.length > 0">
+  <li
+    *ngFor="let prediction of predictions"
+    (click)="selectLocation(prediction)"
+  >
+    {{ prediction.description }}
+  </li>
+</ul>
+
+<google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
+  <map-marker
+    #marker="mapMarker"
+    *ngFor="let markerPosition of markerPositions"
+    [position]="markerPosition"
+    [options]="markerOptions"
+    (mapClick)="openInfoWindow(marker)"
+  >
+  </map-marker>
+  <!-- <map-info-window>
+    <div>Latitude: {{ lat }}</div>
+    <div>Longitude: {{ lng }}</div>
+  </map-info-window> -->
+</google-map>
+
+<!-- <div id="map" style="height: 400px; width: 400px"></div> -->
+<!-- <div>Latitude: {{ display?.lat }}</div>
+<div>Longitude: {{ display?.lng }}</div> -->
+
+<input id="pac-input" class="controls" type="text" placeholder="Search Box" />
+<div id="map" style="height: 400px; width: 400px"></div>
+
+<form class="pt-3">
+  <div class="row">
+    <input
+      id="pac-input"
+      class="py-1 px-4 w-75"
+      type="text"
+      pInputText
+      placeholder="Current Location"
+      [value]="address"
+    />
+  </div>
+  <div class="row">
+    <input
+      class="py-1 px-4 w-75"
+      type="text"
+      pInputText
+      placeholder="Destination"
+    />
+  </div>
+</form>

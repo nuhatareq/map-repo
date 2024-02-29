@@ -1,0 +1,23 @@
+/* autocomplete.component.css */
+input {
+  width: 300px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+li:hover {
+  background-color: #e0e0e0;
+}

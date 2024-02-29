@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Project1</title>
+    <base href="./" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFaXNvUSNlqQoqlNBgCgppWcSeYxb5kDM"></script> -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC63NJQEQn6FQtSWLeCVqFEQSlG2SyFyFw&libraries=places"></script> -->
+  </head>
+  <body>
+    <app-root></app-root>
+
+    <!--
+      The `defer` attribute causes the callback to execute after the full HTML
+      document has been parsed. For non-blocking uses, avoiding race conditions,
+      and consistent behavior across browsers, consider loading using Promises.
+      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+      for more information.
+      -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC63NJQEQn6FQtSWLeCVqFEQSlG2SyFyFw&callback=initAutocomplete&libraries=places"
+      defer
+    ></script>
+  </body>
+</html>
