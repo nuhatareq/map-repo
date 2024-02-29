@@ -90,14 +90,14 @@ export class AppComponent {
             this.position.lat = position.coords.latitude;
             this.position.lng = position.coords.longitude;
             console.log(position.coords, this.position);
-            this.initAutocomplete(this.position);
+            this.initAutocomplete();
             this.getAddressForCoordinates(this.position.lat, this.position.lng);
             this.center = {
               lat: this.position.lat,
               lng: this.position.lng,
             };
 
-            this.addMarker();
+            // this.addMarker();
           },
           (error) => reject(error)
         );
@@ -124,30 +124,32 @@ export class AppComponent {
   //   lat: this.position.lat,
   //   lng: this.position.lng,
   // };
-  zoom = 4;
-  markerOptions: google.maps.MarkerOptions = {
-    draggable: false,
-  };
-  markerPositions: google.maps.LatLngLiteral[] = [];
-  addMarker() {
-    this.markerPositions.push(this.center);
-  }
-  moveMap(event: google.maps.MapMouseEvent) {
-    if (event.latLng != null) this.center = event.latLng.toJSON();
-  }
-  move(event: google.maps.MapMouseEvent) {
-    if (event.latLng != null) this.display = event.latLng.toJSON();
-  }
+  // zoom = 4;
+  // markerOptions: google.maps.MarkerOptions = {
+  //   draggable: false,
+  // };
+  // markerPositions: google.maps.LatLngLiteral[] = [];
+  // addMarker() {
+  //   this.markerPositions.push(this.center);
+  // }
+  // moveMap(event: google.maps.MapMouseEvent) {
+  //   if (event.latLng != null) this.center = event.latLng.toJSON();
+  // }
+  // move(event: google.maps.MapMouseEvent) {
+  //   if (event.latLng != null) this.display = event.latLng.toJSON();
+  // }
 
-  lat: any;
-  lng: any;
-  openInfoWindow(marker: MapMarker) {
-    this.lat = this.display?.lat;
-    this.lng = this.display?.lng;
-    if (this.infoWindow != undefined) this.infoWindow.open(marker);
-  }
+  ////// da m4 fkra leeh bs 5leeh e7tyaty
+  // lat: any;
+  // lng: any;
+  // openInfoWindow(marker: MapMarker) {
+  //   this.lat = this.display?.lat;
+  //   this.lng = this.display?.lng;
+  //   if (this.infoWindow != undefined) this.infoWindow.open(marker);
+  // }
 
-  initAutocomplete(position: any) {
+  destination: any = '';
+  initAutocomplete() {
     console.log(this.position);
     const map = new google.maps.Map(
       document.getElementById('map') as HTMLElement,
@@ -162,7 +164,7 @@ export class AppComponent {
     const input = document.getElementById('pac-input') as HTMLInputElement;
     const searchBox = new google.maps.places.SearchBox(input);
 
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    // map.controls[google.maps.ControlPosition.].push(input);
 
     // Bias the SearchBox results towards current map's viewport.
     map.addListener('bounds_changed', () => {
@@ -181,10 +183,10 @@ export class AppComponent {
       }
 
       // // Clear out the old markers.
-      // markers.forEach((marker) => {
-      //   marker.setMap(null);
-      // });
-      // markers = [];
+      markers.forEach((marker) => {
+        marker.setMap(null);
+      });
+      markers = [];
 
       // For each place, get the icon, name and location.
       const bounds = new google.maps.LatLngBounds();
@@ -212,7 +214,12 @@ export class AppComponent {
             position: place.geometry.location,
           })
         );
-        console.log(markers[0].getPosition()?.lat);
+        this.destination = places[0].formatted_address;
+        console.log(
+          markers[0].getPosition()?.lat,
+          markers[0].getPosition(),
+          places[0].formatted_address
+        );
 
         if (place.geometry.viewport) {
           // Only geocodes have viewport.
