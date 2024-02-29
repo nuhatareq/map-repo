@@ -10,72 +10,36 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 })
 export class AppComponent {
   private geocoder!: google.maps.Geocoder;
-  @ViewChild('searchInput', { static: true }) searchInput!: ElementRef;
-  predictions: any[] = [];
+  // @ViewChild('searchInput', { static: true }) searchInput!: ElementRef;
+  // predictions: any[] = [];
   title = 'project1';
-  display: any;
-  planForm!: FormGroup;
+  // display: any;
   map: any;
-  center: any;
-  position: { lat: number; lng: number } = { lat: 0, lng: 0 };
+  // center: any;
+  currentMarker!: google.maps.Marker[];
+
+  position: { lat: number; lng: number; address: string } = {
+    lat: 0,
+    lng: 0,
+    address: '',
+  };
   constructor(private autocompleteService: GoogleMapsAutocompleteService) {
     this.geocoder = new google.maps.Geocoder();
   }
   @ViewChild(MapInfoWindow) infoWindow: MapInfoWindow | undefined;
   ngOnInit() {
     this.getCurrentLocation();
-    this.setupAutocomplete();
+    // this.setupAutocomplete();
   }
-  address: any;
   getAddressForCoordinates(lat: number, lng: number) {
-    console.log('anna hena');
     try {
-      const address = this.autocompleteService
-        .reverseGeocode(lat, lng)
-        .then((res) => {
-          this.address = res;
-          console.log(res);
-        });
-      console.log('Address for Coordinates:', address);
+      this.autocompleteService.reverseGeocode(lat, lng).then((res) => {
+        this.position.address = res;
+        console.log(this.position);
+      });
     } catch (error) {
       console.error('Error during reverse geocoding:', error);
     }
-  }
-
-  private setupAutocomplete(): void {
-    this.autocompleteService
-      .getPlacePredictions(this.searchInput.nativeElement)
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((predictions: any[]) => {
-          this.predictions = predictions;
-          return [];
-        })
-      )
-      .subscribe();
-  }
-
-  selectLocation(prediction: any): void {
-    this.autocompleteService.getPlaceDetails(prediction.place_id).subscribe(
-      (placeDetails: any) => {
-        // Extract latitude and longitude
-        const latitude = placeDetails.geometry.location.lat();
-        const longitude = placeDetails.geometry.location.lng();
-
-        console.log('Selected Location:', {
-          description: prediction.description,
-          latitude,
-          longitude,
-          placeDetails,
-        });
-
-        // You can perform any action with the selected location details
-      },
-      (error) => {
-        console.error('Error fetching place details:', error);
-      }
-    );
   }
 
   async getCurrentLocation(): Promise<any> {
@@ -89,14 +53,13 @@ export class AppComponent {
             });
             this.position.lat = position.coords.latitude;
             this.position.lng = position.coords.longitude;
-            console.log(position.coords, this.position);
             this.initAutocomplete();
             this.getAddressForCoordinates(this.position.lat, this.position.lng);
-            this.center = {
-              lat: this.position.lat,
-              lng: this.position.lng,
-            };
 
+            // this.center = {
+            //   lat: this.position.lat,
+            //   lng: this.position.lng,
+            // };
             // this.addMarker();
           },
           (error) => reject(error)
@@ -107,50 +70,8 @@ export class AppComponent {
     });
   }
 
-  // private initMap(location: any): void {
-  //   this.map = new (google.maps as any).Map(document.getElementById('map'), {
-  //     center: location,
-  //     zoom: 15,
-  //   });
-  //   console.log(location);
-  //   new google.maps.Marker({
-  //     position: location,
-  //     map: this.map,
-  //     title: 'Your Location',
-  //   });
-  // }
-
-  // center: google.maps.LatLngLiteral = {
-  //   lat: this.position.lat,
-  //   lng: this.position.lng,
-  // };
-  // zoom = 4;
-  // markerOptions: google.maps.MarkerOptions = {
-  //   draggable: false,
-  // };
-  // markerPositions: google.maps.LatLngLiteral[] = [];
-  // addMarker() {
-  //   this.markerPositions.push(this.center);
-  // }
-  // moveMap(event: google.maps.MapMouseEvent) {
-  //   if (event.latLng != null) this.center = event.latLng.toJSON();
-  // }
-  // move(event: google.maps.MapMouseEvent) {
-  //   if (event.latLng != null) this.display = event.latLng.toJSON();
-  // }
-
-  ////// da m4 fkra leeh bs 5leeh e7tyaty
-  // lat: any;
-  // lng: any;
-  // openInfoWindow(marker: MapMarker) {
-  //   this.lat = this.display?.lat;
-  //   this.lng = this.display?.lng;
-  //   if (this.infoWindow != undefined) this.infoWindow.open(marker);
-  // }
-
   destination: any = '';
   initAutocomplete() {
-    console.log(this.position);
     const map = new google.maps.Map(
       document.getElementById('map') as HTMLElement,
       {
@@ -163,12 +84,15 @@ export class AppComponent {
     // Create the search box and link it to the UI element.
     const input = document.getElementById('pac-input') as HTMLInputElement;
     const searchBox = new google.maps.places.SearchBox(input);
-
     // map.controls[google.maps.ControlPosition.].push(input);
 
     // Bias the SearchBox results towards current map's viewport.
+    const bounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(22, 25), // Southwest corner of Egypt
+      new google.maps.LatLng(31, 35) // Northeast corner of Egypt
+    );
     map.addListener('bounds_changed', () => {
-      searchBox.setBounds(map.getBounds() as google.maps.LatLngBounds);
+      searchBox.setBounds(bounds);
     });
 
     let markers: google.maps.Marker[] = [];
@@ -206,6 +130,7 @@ export class AppComponent {
         };
 
         // Create a marker for each place.
+        console.log(place.geometry.location);
         markers.push(
           new google.maps.Marker({
             map,
@@ -215,12 +140,6 @@ export class AppComponent {
           })
         );
         this.destination = places[0].formatted_address;
-        console.log(
-          markers[0].getPosition()?.lat,
-          markers[0].getPosition(),
-          places[0].formatted_address
-        );
-
         if (place.geometry.viewport) {
           // Only geocodes have viewport.
           bounds.union(place.geometry.viewport);
@@ -231,7 +150,83 @@ export class AppComponent {
       map.fitBounds(bounds);
     });
   }
-  getLocation(event: any) {
-    console.log(event);
+  currentLocationMarker!: google.maps.Marker;
+
+  placeMarker(position: any): void {
+    if (this.currentLocationMarker) {
+      this.currentLocationMarker.setMap(null); // Remove existing marker
+    }
+
+    this.currentLocationMarker = new google.maps.Marker({
+      position: { lat: position.lat, lng: position.lng },
+      map: this.map,
+      title: position.address,
+    });
   }
+
+  //// this fn for input predection which now not wanted
+
+  // private setupAutocomplete(): void {
+  //   this.autocompleteService
+  //     .getPlacePredictions(this.searchInput.nativeElement)
+  //     .pipe(
+  //       debounceTime(300),
+  //       distinctUntilChanged(),
+  //       switchMap((predictions: any[]) => {
+  //         this.predictions = predictions;
+  //         return [];
+  //       })
+  //     )
+  //     .subscribe();
+  // }
+  // selectLocation(prediction: any): void {
+  //   this.autocompleteService.getPlaceDetails(prediction.place_id).subscribe(
+  //     (placeDetails: any) => {
+  //       // Extract latitude and longitude
+  //       const latitude = placeDetails.geometry.location.lat();
+  //       const longitude = placeDetails.geometry.location.lng();
+
+  //       console.log('Selected Location:', {
+  //         description: prediction.description,
+  //         latitude,
+  //         longitude,
+  //         placeDetails,
+  //       });
+
+  //       // You can perform any action with the selected location details
+  //     },
+  //     (error) => {
+  //       console.error('Error fetching place details:', error);
+  //     }
+  //   );
+  // }
+
+  //// this code for google map tag first solution
+  // center: google.maps.LatLngLiteral = {
+  //   lat: this.position.lat,
+  //   lng: this.position.lng,
+  // };
+  // zoom = 4;
+  // markerOptions: google.maps.MarkerOptions = {
+  //   draggable: false,
+  // };
+  // markerPositions: google.maps.LatLngLiteral[] = [];
+  // addMarker() {
+  //   this.markerPositions.push(this.center);
+  // }
+  // moveMap(event: google.maps.MapMouseEvent) {
+  //   if (event.latLng != null) this.center = event.latLng.toJSON();
+  // }
+  // move(event: google.maps.MapMouseEvent) {
+  //   if (event.latLng != null) this.display = event.latLng.toJSON();
+  // }
+
+  ////// da m4 fkra leeh bs 5leeh e7tyaty
+  // lat: any;
+  // lng: any;
+  // openInfoWindow(marker: MapMarker) {
+  //   this.lat = this.display?.lat;
+  //   this.lng = this.display?.lng;
+  //   if (this.infoWindow != undefined) this.infoWindow.open(marker);
+  // }
 }
